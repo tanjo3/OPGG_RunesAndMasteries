@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup
 from collections import Counter
+import humanize
 import json
 import re
 import urllib.request
@@ -103,33 +104,27 @@ def pprint_runes(runes):
 def pprint_masteries(masteries):
     "Print masteries in a neatly formatted way."
     print("---F---  ---C---  ---R---")
-    print("{0}     {1}  {2}     {3}  {4}     {5}".format(
-        masteries.get("6111", 0), masteries.get("6114", 0),
+    print("{0}     {1}  {2}     {3}  {4}     {5}".format(masteries.get("6111", 0), masteries.get("6114", 0),
         masteries.get("6311", 0), masteries.get("6312", 0),
         masteries.get("6211", 0), masteries.get("6212", 0)))
-    print("{0}  {1}  {2}  {3}  {4}  {5}  {6}  {7}  {8}".format(
-        masteries.get("6121", 0), masteries.get("6122", 0), masteries.get("6123", 0),
+    print("{0}  {1}  {2}  {3}  {4}  {5}  {6}  {7}  {8}".format(masteries.get("6121", 0), masteries.get("6122", 0), masteries.get("6123", 0),
         masteries.get("6321", 0), masteries.get("6322", 0), masteries.get("6323", 0),
         masteries.get("6221", 0), masteries.get("6223", 0), masteries.get("6222", 0)))
-    print("{0}     {1}  {2}     {3}  {4}     {5}".format(
-        masteries.get("6131", 0), masteries.get("6134", 0),
+    print("{0}     {1}  {2}     {3}  {4}     {5}".format(masteries.get("6131", 0), masteries.get("6134", 0),
         masteries.get("6331", 0), masteries.get("6332", 0),
         masteries.get("6231", 0), masteries.get("6232", 0)))
-    print("{0}  {1}  {2}  {3}  {4}  {5}  {6}  {7}  {8}".format(
-        masteries.get("6141", 0), masteries.get("6142", 0), masteries.get("6143", 0),
+    print("{0}  {1}  {2}  {3}  {4}  {5}  {6}  {7}  {8}".format(masteries.get("6141", 0), masteries.get("6142", 0), masteries.get("6143", 0),
         masteries.get("6341", 0), masteries.get("6342", 0), masteries.get("6343", 0),
         masteries.get("6241", 0), masteries.get("6242", 0), masteries.get("6243", 0)))
-    print("{0}     {1}  {2}     {3}  {4}     {5}".format(
-        masteries.get("6151", 0), masteries.get("6154", 0),
+    print("{0}     {1}  {2}     {3}  {4}     {5}".format(masteries.get("6151", 0), masteries.get("6154", 0),
         masteries.get("6351", 0), masteries.get("6352", 0),
         masteries.get("6251", 0), masteries.get("6252", 0)))
-    print("{0}  {1}  {2}  {3}  {4}  {5}  {6}  {7}  {8}".format(
-        masteries.get("6161", 0), masteries.get("6162", 0), masteries.get("6164", 0),
+    print("{0}  {1}  {2}  {3}  {4}  {5}  {6}  {7}  {8}".format(masteries.get("6161", 0), masteries.get("6162", 0), masteries.get("6164", 0),
         masteries.get("6361", 0), masteries.get("6362", 0), masteries.get("6363", 0),
         masteries.get("6261", 0), masteries.get("6262", 0), masteries.get("6263", 0)))
 
 # See modes below for more info
-mode = 3
+mode = 1
 
 # MODE 1: Get new data from OP.GG and save to file
 if mode == 1:
@@ -156,7 +151,11 @@ if mode == 1:
             print("Processed", key.capitalize(), role.capitalize())
 
     # Write data to file
-    # TODO
+    with open("cached_runes.json", "w") as file:
+        json.dump(all_runes, file, indent=4)
+
+    with open("cached_masteries.json", "w") as file:
+        json.dump(all_masteries, file, indent=4)
 
 # MODE 2: Use cached data
 elif mode == 2:
