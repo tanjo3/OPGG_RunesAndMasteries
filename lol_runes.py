@@ -226,6 +226,7 @@ CHAMPIONS = {
     "kayn": 141,
     "zoe": 142,
     "zyra": 143,
+    "kaisa": 145,
     "gnar": 150,
     "zac": 154,
     "yasuo": 157,
