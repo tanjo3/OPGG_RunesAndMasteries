@@ -21,6 +21,7 @@ RUNE_KEYSTONES = {
     8000: {
         8005: "Press the Attack",
         8008: "Lethal Tempo",
+        8010: "Conqueror",
         8021: "Fleet Footwork"
     },
     8100: {
@@ -107,7 +108,8 @@ RUNE_LESSERS = {
         8429: "Conditioning",
         8430: "Iron Skin",
         8435: "Mirror Shell",
-        8444: "Second Wind"
+        8444: "Second Wind",
+        8472: "Chrysalis"
     }, {
         8242: "Unflinching",
         8451: "Overgrowth",
