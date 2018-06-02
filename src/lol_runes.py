@@ -4,7 +4,7 @@
 
 import re
 from itertools import product
-from multiprocessing import cpu_count, Pool
+from multiprocessing import Pool, cpu_count
 from urllib.request import urlopen
 
 from bs4 import BeautifulSoup
@@ -27,7 +27,8 @@ RUNE_KEYSTONES = {
     8100: {
         8112: "Electrocute",
         8124: "Predator",
-        8128: "Dark Harvest"
+        8128: "Dark Harvest",
+        9923: "Hail of Blades"
     },
     8200: {
         8214: "Summon Aery",
@@ -35,9 +36,9 @@ RUNE_KEYSTONES = {
         8230: "Phase Rush"
     },
     8300: {
-        8326: "Unsealed Spellbook",
         8351: "Glacial Augment",
-        8359: "Kleptomancy"
+        8359: "Kleptomancy",
+        8360: "Unsealed Spellbook"
     },
     8400: {
         8437: "Grasp of the Undying",
@@ -70,13 +71,14 @@ RUNE_LESSERS = {
         8138: "Eyeball Collection"
     }, {
         8105: "Relentless Hunter",
+        8106: "Ultimate Hunter",
         8134: "Ingenious Hunter",
         8135: "Ravenous Hunter"
     }],
     8200: [{
         8224: "Nullifying Orb",
         8226: "Manaflow Band",
-        8243: "The Ultimate Hat"
+        8275: "Nimbus Cloak"
     }, {
         8210: "Transcendence",
         8233: "Absolute Focus",
@@ -95,7 +97,6 @@ RUNE_LESSERS = {
         8321: "Future's Market",
         8345: "Biscuit Delivery"
     }, {
-        8339: "Celestial Body",
         8347: "Cosmic Insight",
         8352: "Time Warp Tonic",
         8410: "Approach Velocity"
@@ -106,8 +107,6 @@ RUNE_LESSERS = {
         8473: "Bone Plating"
     }, {
         8429: "Conditioning",
-        8430: "Iron Skin",
-        8435: "Mirror Shell",
         8444: "Second Wind",
         8472: "Chrysalis"
     }, {
@@ -256,7 +255,8 @@ CHAMPIONS = {
     "bard": 432,
     "rakan": 497,
     "xayah": 498,
-    "ornn": 516
+    "ornn": 516,
+    "pyke": 555
 }
 
 # Number of processes to be spawned for concurrency
@@ -269,7 +269,8 @@ PICKRATE_THRESHOLD = 0.10
 def check_champion_name(champ_name):
     """Validates a string to be the name of a champion.
 
-    If the string is a valid champion name, this function will return the corresponding ID. Otherwise, it returns None.
+    If the string is a valid champion name, this function will return the
+    corresponding ID. Otherwise, it returns None.
 
     Parameters
     ----------
@@ -305,7 +306,8 @@ def check_champion_name(champ_name):
 def check_champion_role(champ_role):
     """Validates a string to be a role.
 
-    If the string is a valid role, this function will returns the role in uppercase. Otherwise, it returns None.
+    If the string is a valid role, this function will returns the role in
+    uppercase. Otherwise, it returns None.
 
     Parameters
     ----------
@@ -323,8 +325,8 @@ def check_champion_role(champ_role):
     champ_role = champ_role.upper()
 
     # Check that it matches one of the five possible roles
-    if champ_role == "TOP" or champ_role == "JUNGLE" or champ_role == "MID" or \
-            champ_role == "ADC" or champ_role == "SUPPORT":
+    if champ_role == "TOP" or champ_role == "JUNGLE" or champ_role == "MID" \
+        or champ_role == "ADC" or champ_role == "SUPPORT":
         return champ_role
     else:
         return None
@@ -333,7 +335,8 @@ def check_champion_role(champ_role):
 def get_runes_for_paths(champ_id, champ_role, keystone_id, secondary_path_id):
     """Retrieve rune data from OP.GG.
 
-    Parses the OP.GG analytics page for the given champion, role, keystone rune, and secondary path and returns the highest winrate rune page.
+    Parses the OP.GG analytics page for the given champion, role, keystone
+    rune, and secondary path and returns the highest winrate rune page.
 
     Parameters
     ----------
@@ -353,7 +356,8 @@ def get_runes_for_paths(champ_id, champ_role, keystone_id, secondary_path_id):
 
     """
 
-    # Generate the URL to the runes data for the combination of primary and secondary paths
+    # Generate the URL to the runes data for the combination of primary and
+    # secondary paths
     rune_url = "http://www.op.gg/champion/ajax/statistics/runeList/championId={0}&position={1}&primaryPerkId={2}&subPerkStyleId={3}"
     rune_url = rune_url.format(
         champ_id, champ_role, keystone_id, secondary_path_id)
@@ -366,19 +370,24 @@ def get_runes_for_paths(champ_id, champ_role, keystone_id, secondary_path_id):
     table_rows = rune_soup.tbody("tr")
     for row in table_rows:
         runes_data = row(
-            "td", "champion-stats__table__cell champion-stats__table__cell--data")[0]
+            "td",
+            "champion-stats__table__cell champion-stats__table__cell--data"
+        )[0]
         runes_pickrate = float(row(
-            "td", "champion-stats__table__cell champion-stats__table__cell--pickrate"
+            "td",
+            "champion-stats__table__cell champion-stats__table__cell--pickrate"
         )[0].contents[0].strip(" %%"))
         runes_winrate = float(row(
-            "td", "champion-stats__table__cell champion-stats__table__cell--winrate"
+            "td",
+            "champion-stats__table__cell champion-stats__table__cell--winrate"
         )[0].string.strip(" %%"))
 
         # Don't consider rune setups that are picked less than the threshold
         if runes_pickrate >= PICKRATE_THRESHOLD:
             # Split ties using pickrate
             if runes_winrate > best_winrate \
-                    or (runes_winrate == best_winrate and runes_pickrate > best_pickrate):
+                    or (runes_winrate == best_winrate \
+                        and runes_pickrate > best_pickrate):
                 best_runes = runes_data
                 best_pickrate = runes_pickrate
                 best_winrate = runes_winrate
@@ -398,7 +407,8 @@ def get_runes_for_paths(champ_id, champ_role, keystone_id, secondary_path_id):
 def get_runes(champ_id, champ_role):
     """Retrieve rune data from OP.GG.
 
-    Parses the OP.GG analytics page for the given champion in the given role and returns the highest winrate rune page of all path combinations.
+    Parses the OP.GG analytics page for the given champion in the given role
+    and returns the highest winrate rune page of all path combinations.
 
     Parameters
     ----------
@@ -423,17 +433,22 @@ def get_runes(champ_id, champ_role):
     with Pool(NUM_PROCESSES) as pool:
         # Loop through all combinations of primary and secondary paths
         all_runes = pool.starmap(get_runes_for_paths, [
-            (champ_id, champ_role, x, y) for x, y in product(keystone_ids, RUNE_PATHS)
+            (champ_id,
+             champ_role,
+             x,
+             y) for x, y in product(keystone_ids, RUNE_PATHS)
         ])
 
-    # Find the highest winrate setup across all combinations of primary and secondary paths
+    # Find the highest winrate setup across all combinations of primary and
+    # secondary paths
     best_runes, best_pickrate, best_winrate = (None, 0, 0)
     for setup in all_runes:
         # Only consider rune setups whose best pickrate is above our threshold
         if setup["pickrate"] >= PICKRATE_THRESHOLD:
             # Split ties using pickrate
             if setup["winrate"] > best_winrate \
-                    or (setup["winrate"] == best_winrate and setup["pickrate"] > best_pickrate):
+                    or (setup["winrate"] == best_winrate \
+                        and setup["pickrate"] > best_pickrate):
                 best_runes = setup
                 best_pickrate = setup["pickrate"]
                 best_winrate = setup["winrate"]
@@ -450,10 +465,12 @@ def get_runes(champ_id, champ_role):
     }
 
     # Parse HTML for best rune setup to get rune IDs
-    id_regex = re.compile("(\d*).png")
+    id_regex = re.compile(r"(\d*).png")
     best_runes_soup = BeautifulSoup(best_runes["runes"], "html.parser")
-    primary_runes, secondary_runes = [path(class_="perk-page__item perk-page__item--active")
-                                      for path in best_runes_soup(class_="perk-page")]
+    primary_runes, secondary_runes = [
+        path(class_="perk-page__item perk-page__item--active")
+        for path in best_runes_soup(class_="perk-page")
+    ]
 
     # Add rune IDs for primary path into return dictionary
     for primary_rune in primary_runes:
@@ -537,5 +554,5 @@ if __name__ == "__main__":
 
             # Print the runes in a pretty format
             pprint_runes(BEST_RUNES)
-        except:
+        except Exception:
             print("ERROR: Unable to retrieve runes.")
